@@ -52,7 +52,7 @@ opsi=input(" Pilihan :  ")
 
 # variabel2 
 expected_response = 101
-control_domain = 'id-public1.sshws.net'
+control_domain = 'sg-sshws.bypass.id'
 headers = { 'Host': control_domain, 'Upgrade': 'websocket'}
 file_hosts = ""
 result_success = []
