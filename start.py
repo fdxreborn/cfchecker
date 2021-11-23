@@ -3,10 +3,10 @@
 # serta melakukan check apakah support untuk melakukan domain fronting
 # mass checker dari file / csv / pcap hasil capture
 
-import requests
+import requests,re
 import sys
 from requests.exceptions import ReadTimeout, Timeout, ConnectionError
-import os, fnmatch
+import os, fnmatch; os.system("clear")
 import csv
 from collections import defaultdict
 
@@ -46,6 +46,7 @@ print("")
 print(" Silahkan Pilih : ")
 print(" 1. Melakukan Checking dari TXT files.")
 print(" 2. Melakukan Checking dari CSV files.")
+print(" 3. Melakukan Checking dari domain.")
 print(" q untuk keluar")
 opsi=input(" Pilihan :  ")
 
@@ -112,10 +113,38 @@ elif str(opsi) == "2":
     
 elif str(opsi) == "q":
     exit()
-else:
-    exit()
 
+elif str(opsi) == "3":
+	subd = input("\nInput Domain: ")
+	subd = subd.replace("https://","").replace("http://","")
+	r = requests.get("https://api.hackertarget.com/hostsearch/?q=" + subd)
+	yn = input("\nLanjutkan Scanning? (y/n): ")
+	if yn.lower() == "y":
+		head = {"Host":"sg-sshws.bypass.id","Upgrade":"websocket"}
+		sukses = []
+		if r.text == "error invalid host":
+			exit("ERR: error invalid host")
+		else:
+			print("\nScanning Started... Press CTRL + Z to Exit!")
+			subdo = re.findall("(.*?),",r.text)
+			for sub in subdo:
+				try:
+					req = requests.get(f"http://{sub}",headers=head,timeout=0.7)
+					if req.status_code == 101:
+						print(colors.GREEN + " [ HIT ] " + colors.ENDC + " SubDomain: " + str(sub) + " - Is Fronting Domain - ")
+						sukses.append(str(sub))
+					else:
+						print(colors.RED + " [ FAIL ] " + colors.ENDC + sub + " responded with status code: " + str(req.status_code) + " code")
+				except (Timeout, ReadTimeout, ConnectionError):
+					print(colors.RED + " [ FAIL] " + colors.ENDC + sub + " TIMEOUT")
+			print("Berhasil Memuat " + colors.GREEN + str(len(sub)) + colors.ENDC)
+			print("berikut hasil subdomain yang sukses didapatkan: \n")
+			for res in sukses:
+				print(res)
+			exit()
 
+	else:
+		exit()
 
 print("Berhasil memuat " + colors.GREEN + str(len(domainlist)) + colors.ENDC + " host Unique dari total " + str(len(parseddom)) + " host")
 print("")
